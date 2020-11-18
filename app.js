@@ -95,3 +95,48 @@ const internQuestions = [
         message: "Where does the intern go to school?"
     },
 ];
+
+async function prompter(manager, engineers, interns) {
+    inquirer.prompt(promptquestions).then((answer) => {
+        if (answer.nextQuestion === "Add an Engineer") {
+            const engineersArray = engineers;
+            inquirer.prompt(engineerQuestions).then((answers)=> {
+                const newEngineer = new Engineer(
+                    answers.engineerName,
+                    answers.engineerID,
+                    answers.engineerEmail,
+                    answers.engineerGithub 
+                );
+                engineersArray.push(newEngineer);
+                prompter(manager, engineersArray, interns)
+            })
+        } else if(answer.nextQuestion === "Add an Intern") {
+            const internsArray = interns;
+            inquirer.prompt(internQuestions).then((answers) => {
+                const newIntern = new Intern(
+                    answers.internName,
+                    answers.internID,
+                    answers.internEmail,
+                    answers.internSchool 
+                );
+                internsArray.push(newIntern);
+                prompter(manager, engineers, internsArray)
+            });
+        } else {
+            const myHTML = render ([manager, ...engineers, ...interns]);
+            fs.writeFileSync("./output/team.html", myHTML)
+
+            return;
+        }
+    })
+}
+
+inquirer.prompt(managerQuestions).then((answers) =>{
+    const manager = new Manager(
+        answers.managerName,
+        answers.managerID,
+        answers.managerEmail,
+        answers.managerOffice
+    )
+    prompter(manager, [], [])
+});
